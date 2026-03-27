@@ -53,7 +53,7 @@ func init() {
 				"Environment file with environment variables in the KEY=VALUE format")
 
 			fs.String("label-prefix", generator.DefaultLabelPrefix,
-				"Prefix for Docker labels")
+				"Prefix for Coreels")
 
 			fs.Bool("proxy-service-tasks", true,
 				"Proxy to service tasks instead of service load balancer")

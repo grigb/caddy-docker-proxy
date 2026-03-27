@@ -511,7 +511,7 @@ Usage of docker-proxy:
   --docker-apis-version
         Comma separated apis version, you could use empty value when no api version for the concern index docker socket like cert_path0,,cert_path2
   --label-prefix string
-        Prefix for Docker labels (default "caddy")
+        Prefix for Coreels (default "caddy")
   --mode
         Which mode this instance should run: standalone | controller | server
   --polling-interval duration
