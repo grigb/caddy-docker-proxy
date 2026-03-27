@@ -158,6 +158,7 @@ func (dockerLoader *DockerLoader) Start() error {
 		zap.Strings("DockerSockets", dockerLoader.options.DockerSockets),
 		zap.Strings("DockerCertsPath", dockerLoader.options.DockerCertsPath),
 		zap.Strings("DockerAPIsVersion", dockerLoader.options.DockerAPIsVersion),
+		zap.String("CaddyfileAutosavePath", CaddyfileAutosavePath),
 	)
 
 	ready := make(chan struct{})
@@ -314,7 +315,7 @@ func (dockerLoader *DockerLoader) updateServer(wg *sync.WaitGroup, server string
 
 	url := "http://" + server + ":2019/load"
 
-	postBody, err := addAdminListen(dockerLoader.lastJSONConfig, "tcp/"+server+":2019")
+	postBody, err := addAdminListen(dockerLoader.lastJSONConfig, getServerAdminListen(dockerLoader.options, server))
 	if err != nil {
 		log.Error("Failed to add admin listen to", zap.String("server", server), zap.Error(err))
 		return
@@ -355,8 +356,20 @@ func addAdminListen(configJSON []byte, listen string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Respect explicit admin settings from Caddyfile/JSON config,
+	// but override "admin off" since the plugin requires the admin API.
+	if config.Admin != nil && !config.Admin.Disabled {
+		return configJSON, nil
+	}
 	config.Admin = &caddy.AdminConfig{
 		Listen: listen,
 	}
 	return json.Marshal(config)
+}
+
+func getServerAdminListen(options *config.Options, server string) string {
+	if options.AdminListen != "" {
+		return options.AdminListen
+	}
+	return "tcp/" + server + ":2019"
 }
